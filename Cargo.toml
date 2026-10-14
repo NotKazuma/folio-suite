@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/core", "crates/native", "crates/ui-egui", "apps/folio-launcher", "xtask"]
+members = ["crates/core", "crates/native", "crates/ui-egui", "crates/write-doc", "apps/folio-launcher", "apps/folio-write", "xtask"]
 
 [workspace.package]
 version = "0.1.0"

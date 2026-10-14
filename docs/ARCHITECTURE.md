@@ -12,8 +12,11 @@ crates/
                             handing an installer to the OS. Work runs on background threads and
                             reports back as events
   ui-egui    folio-ui       the launcher window in egui (model, theme, views)
+  write-doc  folio-write-doc Folio Write's document model: blocks, inline bold/italic spans,
+                            Markdown in and out. No windows, no files
 apps/
   folio-launcher            the desktop shell (eframe) around folio-ui
+  folio-write               the word processor window (eframe) around folio-write-doc
 xtask/                      project automation (placeholder)
 prototypes/web/             the first Write / Sheet / Slide, as small browser apps, until each gets
                             its own Rust repository
