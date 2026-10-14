@@ -1,0 +1,44 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Folio Write</title>
+  <link rel="stylesheet" href="../shared/ui.css">
+  <style>
+    .page-wrap { flex: 1; overflow: auto; padding: 24px 12px; }
+    #doc { max-width: 800px; min-height: 1000px; margin: 0 auto; background: #fff; color: #111; padding: 72px 80px;
+      box-shadow: 0 1px 4px rgba(0,0,0,.2); outline: none; font: 17px/1.6 Georgia, serif; }
+    #doc h1 { font: 700 32px/1.2 system-ui, sans-serif; } #doc h2 { font: 700 24px/1.25 system-ui, sans-serif; }
+    #doc h3 { font: 700 19px/1.3 system-ui, sans-serif; } #doc blockquote { border-left: 3px solid #4f46e5; margin-left: 0; padding-left: 14px; color: #444; }
+    #doc table { border-collapse: collapse; } #doc td, #doc th { border: 1px solid #999; padding: 4px 8px; min-width: 60px; }
+    @media (max-width: 700px) { #doc { padding: 24px 18px; } }
+    @media print { .page-wrap { padding: 0; } #doc { box-shadow: none; max-width: none; padding: 0; } }
+  </style>
+</head>
+<body>
+  <div class="bar" role="toolbar" aria-label="Formatting">
+    <a class="home" href="/" title="Folio Hub">Hub</a><span class="title">Folio Write</span>
+    <button data-cmd="file.new">New</button>
+    <button data-cmd="file.open">Open</button>
+    <select id="exp" aria-label="Save as"><option value="">Save as…</option><option value="html">HTML</option><option value="md">Markdown</option><option value="txt">Plain text</option></select>
+    <button data-cmd="file.print">Print / PDF</button><span class="sep"></span>
+    <select id="block" aria-label="Style"><option value="p">Paragraph</option><option value="h1">Heading 1</option><option value="h2">Heading 2</option><option value="h3">Heading 3</option><option value="blockquote">Quote</option></select>
+    <button data-cmd="fmt.bold" title="Bold (Ctrl+B)"><b>B</b></button>
+    <button data-cmd="fmt.italic" title="Italic (Ctrl+I)"><i>I</i></button>
+    <button data-cmd="fmt.underline" title="Underline (Ctrl+U)"><u>U</u></button>
+    <button data-cmd="fmt.strike"><s>S</s></button><span class="sep"></span>
+    <button data-cmd="list.bullets">• List</button>
+    <button data-cmd="list.numbers">1. List</button>
+    <button data-cmd="align.left">⟸</button><button data-cmd="align.center">≡</button><button data-cmd="align.right">⟹</button><span class="sep"></span>
+    <button data-cmd="insert.link">Link</button>
+    <button data-cmd="insert.table">Table</button>
+    <button data-cmd="insert.rule">Rule</button><span class="sep"></span>
+    <button data-cmd="edit.undo">Undo</button><button data-cmd="edit.redo">Redo</button>
+    <button data-cmd="edit.find">Find &amp; replace</button>
+  </div>
+  <div class="page-wrap"><div id="doc" contenteditable="true" spellcheck="true" aria-label="Document"></div></div>
+  <div class="status"><span id="words">0 words</span><span id="saved">Saved in this browser</span><span>Ctrl+K: commands</span></div>
+  <script type="module" src="write.js"></script>
+</body>
+</html>

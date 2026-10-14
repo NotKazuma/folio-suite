@@ -1,0 +1,43 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Folio Slide</title>
+  <link rel="stylesheet" href="../shared/ui.css">
+  <style>
+    .work { flex: 1; display: flex; min-height: 0; }
+    #thumbs { width: 190px; overflow: auto; padding: 10px; background: var(--panel); border-right: 1px solid var(--line); display: flex; flex-direction: column; gap: 10px; }
+    .thumb { border: 2px solid var(--line); border-radius: 6px; cursor: pointer; overflow: hidden; position: relative; height: 96px; background: #fff; }
+    .thumb.sel { border-color: var(--accent); }
+    .thumb .inner { transform: scale(.1625); transform-origin: top left; width: 960px; height: 540px; pointer-events: none; }
+    .thumb b { position: absolute; left: 4px; bottom: 2px; font-size: 11px; background: var(--panel); padding: 0 4px; border-radius: 3px; }
+    #stage-wrap { flex: 1; display: grid; place-items: center; overflow: auto; padding: 16px; }
+    #stage { position: relative; width: 960px; height: 540px; transform-origin: top left; box-shadow: 0 2px 10px rgba(0,0,0,.3); }
+    #stage [data-id] { cursor: move; } #stage [data-id].sel { outline: 2px solid var(--accent); }
+    .handle { position: absolute; width: 14px; height: 14px; background: var(--accent); right: -7px; bottom: -7px; cursor: nwse-resize; border-radius: 3px; }
+    #present { position: fixed; inset: 0; background: #000; display: none; place-items: center; z-index: 50; }
+    #present.on { display: grid; } #present > div { transform-origin: center; }
+    .props { display: flex; gap: 6px; align-items: center; }
+    .props input[type=number] { width: 64px; }
+    .props input, .props select { font: inherit; padding: 3px 6px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); color: var(--ink); }
+    @media (max-width: 700px) { #thumbs { width: 110px; } .thumb { height: 56px; } .thumb .inner { transform: scale(.095); } }
+  </style>
+</head>
+<body>
+  <div class="bar">
+    <a class="home" href="/" title="Folio Hub">Hub</a><span class="title">Folio Slide</span>
+    <button data-cmd="file.new">New</button><button data-cmd="file.open">Open</button><button data-cmd="file.save.json">Save</button><button data-cmd="file.save.html">Export HTML</button><span class="sep"></span>
+    <button data-cmd="slide.add.title">+ Title</button><button data-cmd="slide.add.content">+ Content</button><button data-cmd="slide.add.blank">+ Blank</button>
+    <button data-cmd="slide.dup">Duplicate</button><button data-cmd="slide.del">Delete</button><span class="sep"></span>
+    <button data-cmd="item.text">Text</button><button data-cmd="item.rect">Shape</button><button data-cmd="item.del">Remove</button><span class="sep"></span>
+    <select id="theme" aria-label="Theme"></select>
+    <span class="props" id="props"></span><span class="sep"></span>
+    <button data-cmd="present.start">▶ Present</button>
+  </div>
+  <div class="work"><div id="thumbs"></div><div id="stage-wrap"><div id="stage"></div></div></div>
+  <div class="status"><span id="count"></span><span id="saved">Saved in this browser</span><span>Double-click text to edit · Ctrl+K commands</span></div>
+  <div id="present"></div>
+  <script type="module" src="slide.js"></script>
+</body>
+</html>

@@ -34,6 +34,7 @@ function card(app) {
     b.onclick = () => start(app.id);
     row.append(b);
   }
+  if (app.web) row.append(el('a', { href: app.web, className: 'open' }, 'Open in browser'));
   row.append(el('a', { href: app.releaseUrl, target: '_blank', rel: 'noopener' }, 'Release page'));
   children.push(row);
   return el('article', { className: 'card' }, ...children);

@@ -20,6 +20,21 @@ const STATIC = {
   '/style.css': ['style.css', 'text/css; charset=utf-8'],
 };
 
+const MIME = { '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8' };
+
+// Serves the bundled web apps under /apps/. Only .html/.js/.css files inside apps/ are reachable.
+async function serveApp(res, pathname) {
+  let rel = decodeURIComponent(pathname).replace(/^\/apps\//, '');
+  if (rel === '' || rel.endsWith('/')) rel += 'index.html';
+  const file = path.resolve(here, 'apps', rel);
+  const type = MIME[path.extname(file)];
+  if (!type || !file.startsWith(path.join(here, 'apps') + path.sep)) return json(res, 404, { error: 'not found' });
+  try {
+    res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-store' });
+    res.end(await readFile(file));
+  } catch { json(res, 404, { error: 'not found' }); }
+}
+
 const json = (res, code, body) => {
   res.writeHead(code, { 'Content-Type': 'application/json', 'Cache-Control': 'no-store' });
   res.end(JSON.stringify(body));
@@ -33,6 +48,7 @@ async function listApps() {
     const asset = latest.assets ? pickAsset(latest.assets, platform) : null;
     return {
       ...app,
+      web: app.web ? `/apps/${app.web}/` : null,
       installed,
       latest: latest.version ?? null,
       notes: latest.notes ?? '',
@@ -89,6 +105,7 @@ const server = http.createServer(async (req, res) => {
       res.writeHead(200, { 'Content-Type': type, 'Cache-Control': 'no-store' });
       return res.end(await readFile(path.join(here, 'public', file)));
     }
+    if (req.method === 'GET' && url.pathname.startsWith('/apps/')) return serveApp(res, url.pathname);
     if (req.method === 'GET' && url.pathname === '/api/apps') return json(res, 200, await listApps());
     const m = /^\/api\/install\/([a-z0-9-]+)$/.exec(url.pathname);
     if (req.method === 'POST' && m) {

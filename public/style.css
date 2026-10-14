@@ -21,3 +21,4 @@ button { font: inherit; border: 0; border-radius: 8px; padding: 8px 14px; backgr
 button:disabled { opacity: .5; cursor: default; }
 a { color: inherit; }
 progress { width: 100%; }
+a.open { font-weight: 600; text-decoration: none; background: var(--ink); color: var(--bg); padding: 8px 14px; border-radius: 8px; }
