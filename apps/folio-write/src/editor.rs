@@ -1,12 +1,15 @@
 //! The editor window: toolbar, status bar and the page of blocks.
 
 use std::path::PathBuf;
+use std::time::Instant;
 
 use eframe::egui::{
     self, Color32, FontId, Key, Modifiers, RichText, Stroke, TextFormat,
     text::{CCursor, CCursorRange, LayoutJob},
 };
-use folio_write_doc::{Block, Document, Kind, spans, toggle_marker};
+use folio_write_doc::{
+    Block, Document, History, Kind, Match, find_all, replace_all, replace_one, spans, toggle_marker,
+};
 
 use crate::fonts;
 
@@ -18,8 +21,25 @@ enum Action {
     JoinPrevious { block: usize },
 }
 
+/// The find-and-replace bar.
+#[derive(Default)]
+struct Find {
+    open: bool,
+    query: String,
+    with: String,
+    case_sensitive: bool,
+    /// Index into the current matches that "Next" last landed on.
+    current: usize,
+    focus_query: bool,
+}
+
 pub struct Editor {
     doc: Document,
+    history: History,
+    started: Instant,
+    find: Find,
+    /// A match to select and scroll to on the next frame.
+    select: Option<Match>,
     path: Option<PathBuf>,
     dirty: bool,
     message: Option<String>,
@@ -40,6 +60,10 @@ impl Editor {
         });
         let doc = Document::from_markdown(WELCOME);
         Editor {
+            history: History::new(&doc),
+            started: Instant::now(),
+            find: Find::default(),
+            select: None,
             doc,
             path: None,
             dirty: false,
@@ -62,24 +86,39 @@ impl Editor {
 
     // ---- files ---------------------------------------------------------------------------------
     fn new_document(&mut self) {
-        self.doc = Document::default();
-        self.path = None;
+        self.replace_document(Document::default(), None);
+    }
+
+    fn replace_document(&mut self, doc: Document, path: Option<PathBuf>) {
+        self.history.reset(&doc);
+        self.doc = doc;
+        self.path = path;
         self.dirty = false;
         self.pending_focus = Some((0, 0));
     }
 
     fn open(&mut self) {
-        let Some(path) = rfd::FileDialog::new().add_filter("Markdown or text", &["md", "markdown", "txt"]).pick_file()
+        let Some(path) = rfd::FileDialog::new()
+            .add_filter("Documents", &["docx", "md", "markdown", "txt"])
+            .add_filter("Word", &["docx"])
+            .add_filter("Markdown or text", &["md", "markdown", "txt"])
+            .pick_file()
         else {
             return;
         };
-        match std::fs::read_to_string(&path) {
-            Ok(text) => {
-                self.doc = Document::from_markdown(&text);
-                self.path = Some(path);
-                self.dirty = false;
+        let is_docx = path.extension().is_some_and(|e| e.eq_ignore_ascii_case("docx"));
+        let loaded = if is_docx {
+            std::fs::read(&path)
+                .map_err(|e| e.to_string())
+                .and_then(|bytes| folio_docx::import(&bytes).map_err(|e| e.to_string()))
+        } else {
+            std::fs::read_to_string(&path).map(|t| Document::from_markdown(&t)).map_err(|e| e.to_string())
+        };
+        match loaded {
+            Ok(doc) => {
+                // a .docx stays a .docx on Save; text files stay text
+                self.replace_document(doc, Some(path));
                 self.message = None;
-                self.pending_focus = Some((0, 0));
             }
             Err(e) => self.message = Some(format!("Could not open the file: {e}")),
         }
@@ -89,13 +128,26 @@ impl Editor {
         let path = match (&self.path, as_new) {
             (Some(p), false) => p.clone(),
             _ => {
-                match rfd::FileDialog::new().add_filter("Markdown", &["md"]).set_file_name("document.md").save_file() {
+                let picked = rfd::FileDialog::new()
+                    .add_filter("Markdown", &["md"])
+                    .add_filter("Word", &["docx"])
+                    .set_file_name("document.md")
+                    .save_file();
+                match picked {
                     Some(p) => p,
                     None => return,
                 }
             }
         };
-        match std::fs::write(&path, self.doc.to_markdown()) {
+        let is_docx = path.extension().is_some_and(|e| e.eq_ignore_ascii_case("docx"));
+        let written = if is_docx {
+            folio_docx::export(&self.doc)
+                .map_err(|e| e.to_string())
+                .and_then(|b| std::fs::write(&path, b).map_err(|e| e.to_string()))
+        } else {
+            std::fs::write(&path, self.doc.to_markdown()).map_err(|e| e.to_string())
+        };
+        match written {
             Ok(()) => {
                 self.path = Some(path);
                 self.dirty = false;
@@ -103,6 +155,35 @@ impl Editor {
             }
             Err(e) => self.message = Some(format!("Could not save the file: {e}")),
         }
+    }
+
+    fn undo(&mut self) {
+        if let Some(prev) = self.history.undo(&self.doc) {
+            self.doc = prev;
+            self.dirty = true;
+        }
+    }
+
+    fn redo(&mut self) {
+        if let Some(next) = self.history.redo(&self.doc) {
+            self.doc = next;
+            self.dirty = true;
+        }
+    }
+
+    fn matches(&self) -> Vec<Match> {
+        find_all(&self.doc, &self.find.query, self.find.case_sensitive)
+    }
+
+    /// Move to the next (or previous) match and select it.
+    fn step_match(&mut self, forward: bool) {
+        let all = self.matches();
+        if all.is_empty() {
+            return;
+        }
+        let n = all.len();
+        self.find.current = if forward { (self.find.current + 1) % n } else { (self.find.current + n - 1) % n };
+        self.select = all.get(self.find.current).copied();
     }
 
     // ---- editing -------------------------------------------------------------------------------
@@ -148,14 +229,29 @@ impl Editor {
 impl eframe::App for Editor {
     fn update(&mut self, ctx: &egui::Context, _frame: &mut eframe::Frame) {
         // Global shortcuts.
-        let (cmd_s, cmd_o, cmd_b, cmd_i) = ctx.input_mut(|i| {
+        let shift_cmd = Modifiers::COMMAND | Modifiers::SHIFT;
+        let (cmd_s, cmd_o, cmd_b, cmd_i, redo_a, undo, redo_b, cmd_f) = ctx.input_mut(|i| {
             (
                 i.consume_key(Modifiers::COMMAND, Key::S),
                 i.consume_key(Modifiers::COMMAND, Key::O),
                 i.consume_key(Modifiers::COMMAND, Key::B),
                 i.consume_key(Modifiers::COMMAND, Key::I),
+                i.consume_key(shift_cmd, Key::Z), // before plain Ctrl+Z, which would also match
+                i.consume_key(Modifiers::COMMAND, Key::Z),
+                i.consume_key(Modifiers::COMMAND, Key::Y),
+                i.consume_key(Modifiers::COMMAND, Key::F),
             )
         });
+        if undo {
+            self.undo();
+        }
+        if redo_a || redo_b {
+            self.redo();
+        }
+        if cmd_f {
+            self.find.open = true;
+            self.find.focus_query = true;
+        }
         if cmd_s {
             self.save(false);
         }
@@ -170,8 +266,14 @@ impl eframe::App for Editor {
         }
 
         self.toolbar(ctx);
+        self.find_bar(ctx);
         self.status_bar(ctx);
         self.page(ctx);
+
+        let now_ms = u64::try_from(self.started.elapsed().as_millis()).unwrap_or(u64::MAX);
+        if self.history.observe(&self.doc, now_ms) {
+            self.dirty = true;
+        }
 
         let title = self.title();
         if title != self.last_title {
@@ -199,6 +301,17 @@ impl Editor {
                     self.save(true);
                 }
                 ui.separator();
+                if ui.add_enabled(self.history.can_undo(), egui::Button::new("Undo")).clicked() {
+                    self.undo();
+                }
+                if ui.add_enabled(self.history.can_redo(), egui::Button::new("Redo")).clicked() {
+                    self.redo();
+                }
+                if ui.button("Find").on_hover_text("Find and replace (Ctrl+F)").clicked() {
+                    self.find.open = true;
+                    self.find.focus_query = true;
+                }
+                ui.separator();
                 let current = self.focus.and_then(|i| self.doc.blocks.get(i)).map(|b| b.kind);
                 egui::ComboBox::from_id_salt("style")
                     .selected_text(current.map_or("Style", Kind::label))
@@ -221,6 +334,70 @@ impl Editor {
         });
     }
 
+    fn find_bar(&mut self, ctx: &egui::Context) {
+        if !self.find.open {
+            return;
+        }
+        egui::TopBottomPanel::top("find").show(ctx, |ui| {
+            ui.add_space(4.0);
+            let mut query_changed = false;
+            let (mut next, mut prev, mut replace, mut replace_every, mut close) = (false, false, false, false, false);
+            ui.horizontal_wrapped(|ui| {
+                let q = ui.add(egui::TextEdit::singleline(&mut self.find.query).hint_text("Find").desired_width(180.0));
+                if self.find.focus_query {
+                    q.request_focus();
+                    self.find.focus_query = false;
+                }
+                query_changed = q.changed();
+                if q.lost_focus() && ui.input(|i| i.key_pressed(Key::Enter)) {
+                    next = true;
+                    q.request_focus();
+                }
+                ui.add(egui::TextEdit::singleline(&mut self.find.with).hint_text("Replace with").desired_width(180.0));
+                if ui.checkbox(&mut self.find.case_sensitive, "Match case").changed() {
+                    query_changed = true;
+                }
+                prev = ui.button("Previous").clicked();
+                next |= ui.button("Next").clicked();
+                replace = ui.button("Replace").clicked();
+                replace_every = ui.button("Replace all").clicked();
+                close = ui.button("Close").clicked();
+            });
+            let n = self.matches().len();
+            if !self.find.query.is_empty() {
+                let text = match n {
+                    0 => "No matches".to_string(),
+                    1 => "1 match".to_string(),
+                    n => format!("{n} matches"),
+                };
+                ui.label(RichText::new(text).small());
+            }
+            ui.add_space(2.0);
+            if query_changed {
+                self.find.current = 0;
+            }
+            if next {
+                self.step_match(true);
+            }
+            if prev {
+                self.step_match(false);
+            }
+            if replace {
+                let all = self.matches();
+                if let Some(m) = all.get(self.find.current.min(all.len().saturating_sub(1))).copied() {
+                    replace_one(&mut self.doc, m, &self.find.with);
+                }
+            }
+            if replace_every {
+                let count = replace_all(&mut self.doc, &self.find.query, &self.find.with, self.find.case_sensitive);
+                self.message = Some(format!("Replaced {count}."));
+            }
+            if close || ctx.input(|i| i.key_pressed(Key::Escape)) {
+                self.find.open = false;
+            }
+        });
+    }
+
     fn status_bar(&self, ctx: &egui::Context) {
         egui::TopBottomPanel::bottom("status").show(ctx, |ui| {
             ui.horizontal(|ui| {
@@ -237,6 +414,7 @@ impl Editor {
     fn page(&mut self, ctx: &egui::Context) {
         let mut action = None;
         let has_bold = self.has_bold_font;
+        let scroll_to = self.select.map(|m| m.block);
         egui::CentralPanel::default()
             .frame(egui::Frame::new().fill(ctx.style().visuals.extreme_bg_color.gamma_multiply(0.8)))
             .show(ctx, |ui| {
@@ -256,9 +434,15 @@ impl Editor {
                             for i in 0..count {
                                 let kind = self.doc.blocks[i].kind;
                                 number = if kind == Kind::Numbered { number + 1 } else { 0 };
-                                if let Some(a) =
-                                    block_ui(ui, &mut self.doc.blocks[i], i, number, has_bold, &mut self.dirty)
-                                {
+                                if let Some(a) = block_ui(
+                                    ui,
+                                    &mut self.doc.blocks[i],
+                                    i,
+                                    number,
+                                    has_bold,
+                                    scroll_to == Some(i),
+                                    &mut self.dirty,
+                                ) {
                                     action = Some(a);
                                 }
                             }
@@ -274,6 +458,15 @@ impl Editor {
 
         if let Some(a) = action {
             self.apply(a);
+        }
+        if let Some(m) = self.select.take() {
+            let id = block_id(m.block);
+            let mut state = egui::TextEdit::load_state(ctx, id).unwrap_or_default();
+            state.cursor.set_char_range(Some(CCursorRange::two(CCursor::new(m.start), CCursor::new(m.end))));
+            state.store(ctx, id);
+            ctx.memory_mut(|mem| mem.request_focus(id));
+            self.focus = Some(m.block);
+            ctx.request_repaint();
         }
         // Track which block has focus, and honour a requested focus move.
         self.focus = (0..self.doc.blocks.len()).find(|&i| ctx.memory(|m| m.has_focus(block_id(i)))).or(self.focus);
@@ -311,6 +504,7 @@ fn block_ui(
     i: usize,
     number: usize,
     has_bold: bool,
+    scroll_here: bool,
     dirty: &mut bool,
 ) -> Option<Action> {
     let id = block_id(i);
@@ -389,6 +583,9 @@ fn block_ui(
             .show(ui);
         if out.response.changed() {
             *dirty = true;
+        }
+        if scroll_here {
+            out.response.scroll_to_me(Some(egui::Align::Center));
         }
     });
     ui.add_space(if matches!(kind, Kind::Bullet | Kind::Numbered) { 2.0 } else { 8.0 });

@@ -8,6 +8,7 @@ repository.workspace = true
 
 [dependencies]
 folio-write-doc = { path = "../../crates/write-doc" }
+folio-docx = { path = "../../crates/docx" }
 eframe = "0.33"
 rfd = "0.15"
 

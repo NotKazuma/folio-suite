@@ -7,9 +7,13 @@
 
 #![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used, clippy::panic))]
 
+pub mod find;
+mod history;
 mod markdown;
 mod spans;
 
+pub use find::{Match, find_all, replace_all, replace_one};
+pub use history::History;
 pub use spans::{Span, plain_text, spans, toggle_marker};
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
