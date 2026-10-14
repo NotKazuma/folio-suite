@@ -1,6 +1,6 @@
 [workspace]
 resolver = "3"
-members = ["crates/core", "crates/native", "crates/ui-egui", "crates/write-doc", "crates/docx", "crates/sheet-engine", "crates/slide-doc", "apps/wren-launcher", "apps/wren-pinion", "apps/wren-trellis", "apps/wren-perch", "xtask"]
+members = ["crates/core", "crates/native", "crates/ui-egui", "apps/wren-launcher", "xtask"]
 
 [workspace.package]
 version = "0.1.0"

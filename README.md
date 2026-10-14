@@ -1,56 +1,42 @@
-# Wren
+# Wren Launcher
 
-Free office and creative tools, written in pure Rust, and the launcher that installs and updates them.
+One window for the whole Wren suite: lists every app, shows which you have and which version is out, and
+installs the right build for your computer after checking its SHA-256. A native app (about 4 MB, pure Rust,
+egui): no Electron, no web view.
 
-| App | An alternative to | Stage |
-|---|---|---|
-| Pinion | Word | early alpha, native (`apps/wren-pinion`, 3 MB) |
-| Trellis | Excel | early alpha, native (`apps/wren-trellis`) |
-| Perch | PowerPoint | early alpha, native (`apps/wren-perch`) |
-| Osprey, Vector, PDF, Video, Audio | Photoshop, Illustrator, Acrobat, Premiere Pro, Audition | planned |
+Wren is a family of lightweight, original, free alternatives to the big office and creative tools. Each app has
+its own name and its own repository, so each is tracked, versioned and released on its own.
 
-## Wren Launcher
+| Group | App | An alternative to | Repository | Status |
+|---|---|---|---|---|
+| Office | **Pinion** (writing) | Word | [wren-pinion](https://github.com/NotKazuma/wren-pinion) | early alpha |
+| Office | **Trellis** (spreadsheets) | Excel | [wren-trellis](https://github.com/NotKazuma/wren-trellis) | early alpha |
+| Office | **Perch** (presentations) | PowerPoint | [wren-perch](https://github.com/NotKazuma/wren-perch) | early alpha |
+| Office | Nest, Dove, Heron, Godwit, Jackdaw, Magpie | OneNote, Outlook, Visio, Project, Access, Acrobat | | planned |
+| Creative | Osprey, Egret, Goldfinch, Lorikeet, Tanager | Photoshop, Illustrator, Fresco, Express, XD | | planned |
+| Publishing and photo | Bower, Peregrine | InDesign, Lightroom | | planned |
+| Video, audio, web, 3D | Starling, Warbler, Colibri, Weaver, Condor | Premiere, Audition, After Effects, Dreamweaver, Maya | | planned |
 
-A native window (about 4 MB, egui) listing every app, showing installed and latest versions, and
-installing the right build for your computer after checking its SHA-256.
+The list lives in [`crates/core/src/catalog.rs`](crates/core/src/catalog.rs). The names of apps that are not
+built yet are provisional and get a trademark/conflict check before any code is written for them.
+
+## How it finds an app
+
+For each app the launcher asks GitHub for the latest release of `NotKazuma/<app id>` and looks for a file named
+`<app id>-<version>-windows-x64.exe`, with a `SHA256SUMS.txt` next to it. It downloads only from that account
+and GitHub's file servers, checks the hash, and then hands the file to Windows. An app with no release yet shows
+"No release yet."
+
+## Build and run
 
 ```sh
 cargo run --release -p wren-launcher
-cargo test --workspace
+powershell -File scripts/check.ps1     # rustfmt, clippy (warnings denied), all tests
 ```
 
-Needs Rust 1.90+ (on Windows, the Visual Studio C++ Build Tools). See [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
+Needs Rust 1.90+ (on Windows, the Visual Studio C++ Build Tools). Architecture notes:
+[docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
-## Download
+## License
 
-Grab the latest build from [Releases](https://github.com/NotKazuma/wren-launcher/releases): each app is a single
-`.exe` (Windows, x64) named `wren-<app>-<version>-windows-x64.exe`, with a `SHA256SUMS.txt` to check them
-against. Wren Launcher lists and installs the rest for you.
-
-## Pinion
-
-A native word processor: headings, paragraphs, quotes, bulleted and numbered lists, **bold** and *italic*
-(Ctrl+B / Ctrl+I), Enter to split and Backspace to join blocks, undo and redo, find and replace, and open and
-save of Markdown or Word (`.docx`) files.
-
-```sh
-cargo run --release -p wren-pinion
-```
-
-## Trellis
-
-A native spreadsheet with its own formula engine: references and ranges, 20 functions (`SUM`, `AVERAGE`, `IF`,
-`ROUND`, `CONCAT` and more), clear error values (`#DIV/0!`, `#CYCLE!`), undo and redo, copy and paste, and CSV
-open and save. Only the visible cells are drawn, so large sheets stay quick.
-
-## Perch
-
-A native presentation editor: title, content and blank layouts, four themes, text, rectangles and ellipses you
-can drag and resize, speaker notes, full-screen presenting (F5), outline export, and open and save as JSON.
-
-## Prototypes
-
-`prototypes/web/` holds the first Write, Sheet and Slide as dependency-free browser apps
-(`npm test` there runs their tests). They are the first sketches of the three apps above, kept for reference.
-
-All code here is original. License: MIT OR Apache-2.0.
+MIT OR Apache-2.0, at your option. See `LICENSE-MIT` and `LICENSE-APACHE`.

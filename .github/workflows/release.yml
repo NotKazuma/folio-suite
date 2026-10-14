@@ -1,4 +1,5 @@
 name: release
+# Runs only when a version tag (v1.2.3) is pushed.
 on:
   push:
     tags: ['v*']
@@ -14,16 +15,14 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --workspace
-      - run: cargo build --release -p wren-launcher -p wren-pinion -p wren-trellis -p wren-perch
+      - run: cargo build --release -p wren-launcher
       - name: Package
         shell: pwsh
         run: |
-          # Files are named <app id>-<version>-windows-x64.exe: the launcher finds each app by that prefix.
+          # <id>-<version>-windows-x64.exe, same shape as every Wren app.
           $v = "${{ github.ref_name }}".TrimStart('v')
           New-Item -ItemType Directory -Force dist | Out-Null
-          foreach ($app in 'wren-launcher','wren-pinion','wren-trellis','wren-perch') {
-            Copy-Item "target/release/$app.exe" "dist/$app-$v-windows-x64.exe"
-          }
+          Copy-Item "target/release/wren-launcher.exe" "dist/wren-launcher-$v-windows-x64.exe"
           Push-Location dist
           Get-ChildItem *.exe | ForEach-Object { "$((Get-FileHash $_ -Algorithm SHA256).Hash.ToLower())  $($_.Name)" } | Set-Content SHA256SUMS.txt
           Pop-Location

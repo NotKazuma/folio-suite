@@ -1,58 +1,51 @@
 # Architecture
 
-Wren is a suite of free office and creative apps, written in pure Rust, plus a launcher that
-installs and updates them. One repository per app (like `wren-pinion`), and this repository for
-the launcher and shared pieces.
+Wren is a suite of free office and creative apps in pure Rust. **Each app has its own repository**; this
+repository is only the launcher that lists them and installs them.
 
 ```text
 crates/
-  core       wren-core     pure, no I/O: the suite catalog, version ordering, release parsing,
-                            choosing the right download per platform, checksum files, app status
-  native     wren-native   desktop only: GitHub lookups, verified downloads, the installed record,
-                            handing an installer to the OS. Work runs on background threads and
-                            reports back as events
-  ui-egui    wren-ui       the launcher window in egui (model, theme, views)
-  write-doc  wren-pinion-doc Pinion's document model: blocks, inline bold/italic spans,
-                            Markdown in and out, undo history, find and replace. No windows, no files
-  docx       wren-docx     reads and writes Word .docx (size-capped; foreign files are hostile)
-  sheet-engine wren-trellis-engine  cell addresses, formula parser, lazy evaluator, CSV
-  slide-doc  wren-perch-doc the deck model: slides, items, themes, safe JSON loading
+  core       wren-core     pure, no I/O: the app catalog (21 apps in 4 sections), version ordering,
+                           release parsing, choosing the right download per platform, checksum files,
+                           app status
+  native     wren-native   desktop only: GitHub lookups (with ETag caching), verified downloads, the
+                           installed-apps record, handing an installer to the OS; runs on background
+                           threads and reports back as events
+  ui-egui    wren-ui       the launcher window in egui: model, theme, views
 apps/
   wren-launcher            the desktop shell (eframe) around wren-ui
-  wren-pinion               the word processor window (eframe) around wren-pinion-doc
-  wren-trellis               the spreadsheet window around wren-trellis-engine
-  wren-perch               the presentation editor around wren-perch-doc
-xtask/                      project automation (placeholder)
-prototypes/web/             the first Write / Sheet / Slide, as small browser apps, until each gets
-                            its own Rust repository
+xtask/                     project automation (placeholder)
+scripts/check.ps1          what CI runs: rustfmt, clippy -D warnings, tests
 ```
 
-Layering: `core` depends on nothing else here. `native` uses `core`. `ui-egui` uses both.
-Nothing below the apps opens windows.
+Layering: `core` depends on nothing else here; `native` uses `core`; `ui-egui` uses both. Nothing below the app
+opens windows.
 
 ## Rules
 
-- **Never crash.** Non-test code has no `unwrap`, `expect`, `panic!`, `todo!`; clippy denies them.
-  No `unsafe` (the workspace forbids it). A bad response, a half-written file or a corrupt
-  settings file becomes an error the user can read.
-- **Network data is hostile.** Sizes are capped, nothing is indexed, unknown fields are ignored.
-- **Install safely.** Download only from `github.com/wren-launcher/<app>` and GitHub's file CDN
-  (checked again after redirects). Verify against the release's `SHA256SUMS.txt`. Never replace a
-  running app, never delete files the launcher did not create, never elevate silently.
+- **Never crash.** Non-test code has no `unwrap`, `expect`, `panic!` or `todo!` (clippy denies them) and no
+  `unsafe` (the workspace forbids it). A bad response, a half-written file or a corrupt settings file becomes
+  an error the user can read.
+- **Network data is hostile.** Sizes are capped, nothing is indexed blindly, unknown fields are ignored.
+- **Install safely.** Download only from `github.com/NotKazuma/<app id>` and GitHub's file CDN (checked again
+  after redirects). Verify against the release's `SHA256SUMS.txt`. Never delete files the launcher did not
+  create; never elevate silently.
 - **No Electron, no webview shells.**
 
-## Where releases live
+## Where an app's releases live
 
-Until each app has its own repository, every app publishes to this repository's releases, with files named
-`<app id>-<version>-windows-x64.exe`. The launcher finds an app's file by that prefix
-(`wren_core::platform::pick_asset`). To split an app out later, give it its own repository and change
-`App::repo()` in `crates/core/src/catalog.rs`.
+Every app is its own repository (`App::repo()` in `crates/core/src/catalog.rs` is `NotKazuma/<id>`) and publishes
+`<id>-<version>-windows-x64.exe` plus `SHA256SUMS.txt` with each tagged release. `pick_asset(assets, platform,
+stem)` in `crates/core/src/platform.rs` selects an app's file by that id prefix (so `wren-pinion` never sees
+`wren-pinionx`'s files). To move the suite to a GitHub organization, transfer the repos and change `ORG`.
 
-## Checks
+## Adding an app
 
-`scripts/check.ps1` runs what CI runs: rustfmt, clippy with warnings denied, and all tests.
+Add one `app(...)` line to `SUITE` in the catalog (id, name, tagline, what it replaces, colour, stage, category),
+create the app's repository with a release workflow that publishes the file name above, and it appears in its
+section. The catalog tests check ids are unique, prefixed `wren-`, match the display name, and sit in category
+order.
 
 ## Releases
 
-Tag `vX.Y.Z`; GitHub Actions tests, builds `wren-launcher.exe`, zips it with `SHA256SUMS.txt` and
-publishes the release.
+Tag `vX.Y.Z` to build and publish `wren-launcher-<version>-windows-x64.exe` plus its checksum file.
