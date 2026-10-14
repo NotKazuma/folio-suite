@@ -2,7 +2,17 @@
 
 Free, original office and creative tools, plus **Folio Hub**, the launcher that installs and updates them.
 
-## Run it
+## Desktop app (Windows)
+
+`desktop/` is a tiny native shell (about 2 MB; WinForms + the system's Edge WebView2) that runs the Hub and all three editors in their own window, offline.
+
+```sh
+cd desktop && dotnet run -c Release     # needs the .NET 8 SDK; users need the .NET 8 Desktop Runtime
+```
+
+Tag a release (`git tag v0.1.0 && git push --tags`) and GitHub Actions builds two zips: a small one and a standalone one that bundles .NET.
+
+## Run it in a browser
 
 ```sh
 npm start        # http://127.0.0.1:4873

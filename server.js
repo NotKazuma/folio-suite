@@ -15,6 +15,7 @@ const platform = currentPlatform();
 const jobs = new Map(); // app id -> { state, percent, error }
 
 const STATIC = {
+  '/index.html': ['index.html', 'text/html; charset=utf-8'],
   '/': ['index.html', 'text/html; charset=utf-8'],
   '/app.js': ['app.js', 'text/javascript; charset=utf-8'],
   '/style.css': ['style.css', 'text/css; charset=utf-8'],

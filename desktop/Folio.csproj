@@ -1,0 +1,23 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWindowsForms>true</UseWindowsForms>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <AssemblyName>Folio</AssemblyName>
+    <RootNamespace>Folio</RootNamespace>
+    <ApplicationIcon>folio.ico</ApplicationIcon>
+    <Version>0.1.0</Version>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
+    <InvariantGlobalization>true</InvariantGlobalization>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2792.45" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="..\public\**\*" Link="web\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\apps\**\*" Link="web\apps\%(RecursiveDir)%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <Content Include="..\catalog.json" Link="catalog.json" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+</Project>
