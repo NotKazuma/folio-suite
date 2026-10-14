@@ -1,0 +1,13 @@
+{
+  "org": "folio-suite",
+  "apps": [
+    { "id": "folio-write",  "name": "Folio Write",  "tagline": "Documents and writing",        "replaces": "Word",         "color": "#2563eb" },
+    { "id": "folio-sheet",  "name": "Folio Sheet",  "tagline": "Spreadsheets and data",        "replaces": "Excel",        "color": "#16a34a" },
+    { "id": "folio-slide",  "name": "Folio Slide",  "tagline": "Presentations",                "replaces": "PowerPoint",   "color": "#ea580c" },
+    { "id": "folio-photo",  "name": "Folio Photo",  "tagline": "Image editing and retouching", "replaces": "Photoshop",    "color": "#7c3aed" },
+    { "id": "folio-vector", "name": "Folio Vector", "tagline": "Vector illustration",          "replaces": "Illustrator",  "color": "#db2777" },
+    { "id": "folio-pdf",    "name": "Folio PDF",    "tagline": "Read, edit and sign PDFs",     "replaces": "Acrobat",      "color": "#dc2626" },
+    { "id": "folio-video",  "name": "Folio Video",  "tagline": "Video editing",                "replaces": "Premiere Pro", "color": "#0891b2" },
+    { "id": "folio-audio",  "name": "Folio Audio",  "tagline": "Recording and mixing",         "replaces": "Audition",     "color": "#ca8a04" }
+  ]
+}
