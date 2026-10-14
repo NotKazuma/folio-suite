@@ -1,4 +1,4 @@
-//! Folio Sheet's calculation engine: cell addresses, a formula parser, a lazy evaluator that is
+//! Trellis's calculation engine: cell addresses, a formula parser, a lazy evaluator that is
 //! safe against cycles, and CSV in and out. No windows, no files.
 
 #![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used, clippy::panic))]

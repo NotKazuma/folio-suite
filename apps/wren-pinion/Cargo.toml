@@ -1,5 +1,5 @@
 [package]
-name = "folio-launcher"
+name = "wren-pinion"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -7,10 +7,10 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-folio-core = { path = "../../crates/core" }
-folio-native = { path = "../../crates/native" }
-folio-ui = { path = "../../crates/ui-egui" }
+wren-pinion-doc = { path = "../../crates/write-doc" }
+wren-docx = { path = "../../crates/docx" }
 eframe = "0.33"
+rfd = "0.15"
 
 [lints]
 workspace = true

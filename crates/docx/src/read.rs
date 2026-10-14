@@ -3,8 +3,8 @@
 use std::collections::HashMap;
 use std::io::{Cursor, Read};
 
-use folio_write_doc::{Block, Document, Kind};
 use roxmltree::{Document as Xml, Node};
+use wren_pinion_doc::{Block, Document, Kind};
 use zip::ZipArchive;
 
 use crate::{Error, MAX_PART_BYTES};

@@ -1,4 +1,4 @@
-//! Folio UI: the launcher's window contents, in egui.
+//! Wren UI: the launcher's window contents, in egui.
 //!
 //! [`Launcher`] owns the model and draws it; the desktop shell only has to call
 //! [`Launcher::ui`] once per frame.
@@ -9,8 +9,8 @@ mod model;
 mod theme;
 mod views;
 
-use folio_native::Backend;
 pub use model::{AppState, Job, Model};
+use wren_native::Backend;
 
 pub struct Launcher {
     backend: Backend,
@@ -22,7 +22,7 @@ impl Launcher {
     pub fn new(ctx: &egui::Context) -> Launcher {
         let backend = Backend::new();
         let model = Model::new(backend.platform());
-        backend.refresh_all(&folio_core::SUITE);
+        backend.refresh_all(&wren_core::SUITE);
         let dark = ctx.style().visuals.dark_mode;
         theme::apply(ctx, dark);
         Launcher { backend, model, dark }

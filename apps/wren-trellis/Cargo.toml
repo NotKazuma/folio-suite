@@ -1,5 +1,5 @@
 [package]
-name = "folio-sheet"
+name = "wren-trellis"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -7,7 +7,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-folio-sheet-engine = { path = "../../crates/sheet-engine" }
+wren-trellis-engine = { path = "../../crates/sheet-engine" }
 eframe = "0.33"
 rfd = "0.15"
 

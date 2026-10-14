@@ -1,5 +1,5 @@
-//! Folio Sheet: a native spreadsheet. Only the cells on screen are drawn, so a big sheet stays
-//! fast; formulas are calculated by `folio-sheet-engine`.
+//! Trellis: a native spreadsheet. Only the cells on screen are drawn, so a big sheet stays
+//! fast; formulas are calculated by `wren-trellis-engine`.
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 
@@ -7,7 +7,7 @@ use std::collections::HashMap;
 use std::path::PathBuf;
 
 use eframe::egui::{self, Align2, Color32, FontId, Key, Modifiers, Pos2, Rect, Sense, Stroke, StrokeKind, vec2};
-use folio_sheet_engine::{Addr, Sheet, Value, col_name, from_csv, to_csv};
+use wren_trellis_engine::{Addr, Sheet, Value, col_name, from_csv, to_csv};
 
 const COLS: u32 = 52;
 const ROWS: u32 = 1000;
@@ -77,7 +77,7 @@ impl App {
             .as_ref()
             .and_then(|p| p.file_name())
             .map_or("Untitled".into(), |n| n.to_string_lossy().to_string());
-        format!("{name}{} - Folio Sheet", if self.dirty { " •" } else { "" })
+        format!("{name}{} - Trellis", if self.dirty { " •" } else { "" })
     }
 
     // ---- editing -------------------------------------------------------------------------------
@@ -511,10 +511,10 @@ impl App {
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_title("Folio Sheet")
+            .with_title("Trellis")
             .with_inner_size([1100.0, 720.0])
             .with_min_inner_size([480.0, 360.0]),
         ..Default::default()
     };
-    eframe::run_native("Folio Sheet", options, Box::new(|_cc| Ok(Box::new(App::new()))))
+    eframe::run_native("Trellis", options, Box::new(|_cc| Ok(Box::new(App::new()))))
 }

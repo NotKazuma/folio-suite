@@ -2,7 +2,7 @@
 
 use std::io::{Cursor, Write};
 
-use folio_write_doc::{Document, Kind, spans};
+use wren_pinion_doc::{Document, Kind, spans};
 use zip::{CompressionMethod, ZipWriter, write::SimpleFileOptions};
 
 use crate::Error;

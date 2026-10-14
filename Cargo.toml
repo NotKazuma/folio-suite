@@ -1,13 +1,13 @@
 [workspace]
 resolver = "3"
-members = ["crates/core", "crates/native", "crates/ui-egui", "crates/write-doc", "crates/docx", "crates/sheet-engine", "crates/slide-doc", "apps/folio-launcher", "apps/folio-write", "apps/folio-sheet", "apps/folio-slide", "xtask"]
+members = ["crates/core", "crates/native", "crates/ui-egui", "crates/write-doc", "crates/docx", "crates/sheet-engine", "crates/slide-doc", "apps/wren-launcher", "apps/wren-pinion", "apps/wren-trellis", "apps/wren-perch", "xtask"]
 
 [workspace.package]
 version = "0.1.0"
 edition = "2024"
 rust-version = "1.90"
 license = "MIT OR Apache-2.0"
-repository = "https://github.com/NotKazuma/folio-suite"
+repository = "https://github.com/NotKazuma/wren-launcher"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"

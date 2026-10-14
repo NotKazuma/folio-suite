@@ -1,4 +1,4 @@
-//! Folio Slide's deck model: slides made of positioned items on a 960 x 540 canvas.
+//! Perch's deck model: slides made of positioned items on a 960 x 540 canvas.
 //! Pure data and operations; drawing and windows live in the app.
 
 #![cfg_attr(test, allow(clippy::unwrap_used, clippy::expect_used, clippy::panic))]
@@ -190,8 +190,7 @@ impl Deck {
         if text.len() > MAX_FILE_BYTES {
             return Err("This presentation is too large to open.".into());
         }
-        let mut deck: Deck =
-            serde_json::from_str(text).map_err(|_| "This is not a Folio Slide presentation.".to_string())?;
+        let mut deck: Deck = serde_json::from_str(text).map_err(|_| "This is not a Perch presentation.".to_string())?;
         if deck.slides.is_empty() || deck.slides.len() > MAX_SLIDES {
             return Err("This presentation has an unusable number of slides.".into());
         }

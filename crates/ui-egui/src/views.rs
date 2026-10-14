@@ -4,8 +4,8 @@
 use egui::{
     Align, Align2, Color32, CornerRadius, FontId, Layout, ProgressBar, RichText, Sense, Stroke, StrokeKind, vec2,
 };
-use folio_core::Status;
-use folio_native::Latest;
+use wren_core::{Category, Stage, Status};
+use wren_native::Latest;
 
 use crate::model::{AppState, Job};
 use crate::{Launcher, theme};
@@ -27,10 +27,16 @@ pub fn show(ctx: &egui::Context, ui_state: &mut Launcher) {
             ui.horizontal(|ui| {
                 ui.vertical(|ui| {
                     ui.label(RichText::new("01 / THE SUITE").small().color(t.accent).strong());
-                    ui.label(RichText::new("Eight tools. One home.").heading().strong());
-                    ui.label(RichText::new("Eight apps · Open source · Pure Rust").small().color(t.muted));
+                    let total = ui_state.model.apps.len();
+                    let built = ui_state.model.apps.iter().filter(|s| s.app.stage == Stage::Alpha).count();
+                    ui.label(RichText::new("One home for every tool.").heading().strong());
+                    ui.label(
+                        RichText::new(format!("{total} apps · {built} available · Open source · Pure Rust"))
+                            .small()
+                            .color(t.muted),
+                    );
                     ui.add_space(6.0);
-                    ui.horizontal(|ui| {
+                    ui.horizontal_wrapped(|ui| {
                         ui.spacing_mut().item_spacing.x = 6.0;
                         for s in &ui_state.model.apps {
                             mini_tile(ui, s);
@@ -42,7 +48,7 @@ pub fn show(ctx: &egui::Context, ui_state: &mut Launcher) {
                         ui_state.toggle_theme(ctx);
                     }
                     if ui.button("Check again").clicked() {
-                        ui_state.backend.refresh_all(&folio_core::SUITE);
+                        ui_state.backend.refresh_all(&wren_core::SUITE);
                     }
                 });
             });
@@ -56,18 +62,27 @@ pub fn show(ctx: &egui::Context, ui_state: &mut Launcher) {
             let width = ui.available_width() - 24.0;
             let cols = (((width + GAP) / (CARD_MIN + GAP)).floor() as usize).max(1);
             let card_w = ((width - GAP * (cols as f32 - 1.0)) / cols as f32).max(200.0);
-            let mut action: Option<&'static folio_core::App> = None;
-            egui::Grid::new("apps").spacing(vec2(GAP, GAP)).show(ui, |ui| {
-                for (i, state) in ui_state.model.apps.iter().enumerate() {
-                    let status = ui_state.model.status(state);
-                    if card(ui, &t, state, i + 1, status, card_w) {
-                        action = Some(state.app);
+            let mut action: Option<&'static wren_core::App> = None;
+            let mut number = 0;
+            for category in Category::ALL {
+                ui.add_space(14.0);
+                ui.label(RichText::new(category.label().to_uppercase()).small().color(t.muted).strong());
+                ui.add_space(4.0);
+                egui::Grid::new(category.label()).spacing(vec2(GAP, GAP)).show(ui, |ui| {
+                    let mut in_row = 0;
+                    for state in ui_state.model.apps.iter().filter(|s| s.app.category == category) {
+                        number += 1;
+                        let status = ui_state.model.status(state);
+                        if card(ui, &t, state, number, status, card_w) {
+                            action = Some(state.app);
+                        }
+                        in_row += 1;
+                        if in_row % cols == 0 {
+                            ui.end_row();
+                        }
                     }
-                    if (i + 1) % cols == 0 {
-                        ui.end_row();
-                    }
-                }
-            });
+                });
+            }
             ui.add_space(16.0);
             ui.label(RichText::new("More apps are on the way.").color(t.muted));
             if let Some(app) = action {
@@ -163,7 +178,7 @@ fn card(ui: &mut egui::Ui, t: &theme::Tokens, s: &AppState, number: usize, statu
                         Some(Latest::Release(r)) if !r.page_url.is_empty() => r.page_url.clone(),
                         _ => s.app.releases_url(),
                     };
-                    ui.hyperlink_to(format!("Explore {}", s.app.name.trim_start_matches("Folio ")), url);
+                    ui.hyperlink_to(format!("Explore {}", s.app.name.trim_start_matches("Wren ")), url);
                 });
             });
         });

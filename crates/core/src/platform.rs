@@ -76,7 +76,7 @@ fn arch_words(a: Arch) -> &'static [&'static str] {
     }
 }
 
-/// `folio-write-1.0.0-x64.exe` belongs to `folio-write`; `folio-writer-...` does not.
+/// `wren-pinion-1.0.0-x64.exe` belongs to `wren-pinion`; `wren-pinionr-...` does not.
 fn is_own_file(lower_name: &str, stem: &str) -> bool {
     lower_name[stem.len()..].starts_with(['-', '_', '.'])
 }
@@ -137,7 +137,7 @@ mod tests {
     fn assets(names: &[&str]) -> Vec<Asset> {
         names
             .iter()
-            .map(|n| Asset { name: (*n).into(), url: format!("https://github.com/folio-suite/x/{n}"), size: 1 })
+            .map(|n| Asset { name: (*n).into(), url: format!("https://github.com/NotKazuma/wren-pinion/{n}"), size: 1 })
             .collect()
     }
 
@@ -146,43 +146,43 @@ mod tests {
     #[test]
     fn picks_by_os_and_cpu() {
         let a = assets(&[
-            "folio-write-1.0.0-windows-x64.msi",
-            "folio-write-1.0.0-windows-arm64.msi",
-            "folio-write-1.0.0-macos-arm64.dmg",
-            "folio-write-1.0.0-linux-x86_64.AppImage",
+            "wren-pinion-1.0.0-windows-x64.msi",
+            "wren-pinion-1.0.0-windows-arm64.msi",
+            "wren-pinion-1.0.0-macos-arm64.dmg",
+            "wren-pinion-1.0.0-linux-x86_64.AppImage",
             "SHA256SUMS.txt",
         ]);
-        assert_eq!(pick_asset(&a, WIN_X64, "folio-write").unwrap().name, "folio-write-1.0.0-windows-x64.msi");
+        assert_eq!(pick_asset(&a, WIN_X64, "wren-pinion").unwrap().name, "wren-pinion-1.0.0-windows-x64.msi");
         let arm = Platform { os: Os::Windows, arch: Arch::Arm64 };
-        assert_eq!(pick_asset(&a, arm, "folio-write").unwrap().name, "folio-write-1.0.0-windows-arm64.msi");
+        assert_eq!(pick_asset(&a, arm, "wren-pinion").unwrap().name, "wren-pinion-1.0.0-windows-arm64.msi");
         let mac_intel = Platform { os: Os::MacOs, arch: Arch::X64 };
-        assert!(pick_asset(&a, mac_intel, "folio-write").is_none());
+        assert!(pick_asset(&a, mac_intel, "wren-pinion").is_none());
         let linux = Platform { os: Os::Linux, arch: Arch::X64 };
-        assert!(pick_asset(&a, linux, "folio-write").unwrap().name.ends_with(".AppImage"));
+        assert!(pick_asset(&a, linux, "wren-pinion").unwrap().name.ends_with(".AppImage"));
     }
 
     #[test]
     fn installer_beats_bare_exe_and_checksums_never_win() {
-        let a = assets(&["folio-x64.exe", "folio-x64.msi", "folio-x64.msi.sha256"]);
-        assert_eq!(pick_asset(&a, WIN_X64, "folio").unwrap().name, "folio-x64.msi");
+        let a = assets(&["wren-x64.exe", "wren-x64.msi", "wren-x64.msi.sha256"]);
+        assert_eq!(pick_asset(&a, WIN_X64, "wren").unwrap().name, "wren-x64.msi");
     }
 
     #[test]
     fn each_app_only_sees_its_own_files() {
         let a = assets(&[
-            "folio-write-1.0.0-windows-x64.exe",
-            "folio-sheet-1.0.0-windows-x64.exe",
-            "folio-writer-1.0.0-windows-x64.exe",
+            "wren-pinion-1.0.0-windows-x64.exe",
+            "wren-trellis-1.0.0-windows-x64.exe",
+            "wren-pinionr-1.0.0-windows-x64.exe",
         ]);
-        assert_eq!(pick_asset(&a, WIN_X64, "folio-write").unwrap().name, "folio-write-1.0.0-windows-x64.exe");
-        assert_eq!(pick_asset(&a, WIN_X64, "folio-sheet").unwrap().name, "folio-sheet-1.0.0-windows-x64.exe");
-        assert!(pick_asset(&a, WIN_X64, "folio-slide").is_none());
-        assert!(pick_asset(&a, WIN_X64, "folio-wri").is_none());
+        assert_eq!(pick_asset(&a, WIN_X64, "wren-pinion").unwrap().name, "wren-pinion-1.0.0-windows-x64.exe");
+        assert_eq!(pick_asset(&a, WIN_X64, "wren-trellis").unwrap().name, "wren-trellis-1.0.0-windows-x64.exe");
+        assert!(pick_asset(&a, WIN_X64, "wren-perch").is_none());
+        assert!(pick_asset(&a, WIN_X64, "wren-wri").is_none());
     }
 
     #[test]
     fn unknown_os_gets_nothing() {
-        let a = assets(&["folio.msi"]);
-        assert!(pick_asset(&a, Platform { os: Os::Other, arch: Arch::X64 }, "folio").is_none());
+        let a = assets(&["wren.msi"]);
+        assert!(pick_asset(&a, Platform { os: Os::Other, arch: Arch::X64 }, "wren").is_none());
     }
 }

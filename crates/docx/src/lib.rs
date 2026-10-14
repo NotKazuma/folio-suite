@@ -1,4 +1,4 @@
-//! Reading and writing Word `.docx` files for Folio Write.
+//! Reading and writing Word `.docx` files for Pinion.
 //!
 //! Supported: paragraphs, Heading 1-3, bulleted and numbered lists, quotes, bold and italic.
 //! Everything else in a foreign file (tables, pictures, headers) is flattened to its text or
@@ -44,7 +44,7 @@ impl std::error::Error for Error {}
 #[cfg(test)]
 mod tests {
     use super::*;
-    use folio_write_doc::{Block, Document, Kind};
+    use wren_pinion_doc::{Block, Document, Kind};
 
     fn sample() -> Document {
         Document {

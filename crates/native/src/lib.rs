@@ -1,4 +1,4 @@
-//! Folio native: the launcher's contact with the outside world (desktop only).
+//! Wren native: the launcher's contact with the outside world (desktop only).
 //!
 //! HTTP to GitHub, verified downloads, the record of what is installed, and handing an
 //! installer to the operating system. The UI never blocks on any of it: it asks the [`Backend`]
@@ -13,7 +13,7 @@ pub mod state;
 use std::sync::mpsc::{self, Receiver, Sender};
 use std::sync::{Arc, Mutex};
 
-use folio_core::{App, Platform, Release, platform::pick_asset};
+use wren_core::{App, Platform, Release, platform::pick_asset};
 
 /// What a lookup of an app's latest release found.
 #[derive(Clone, Debug, PartialEq, Eq)]

@@ -1,4 +1,4 @@
-//! Folio's look: calm neutrals, one indigo accent, soft corners, hairline borders, no shadows.
+//! Wren's look: calm neutrals, one indigo accent, soft corners, hairline borders, no shadows.
 
 use egui::{Color32, CornerRadius, FontFamily, FontId, Stroke, TextStyle};
 

@@ -1,4 +1,4 @@
-//! Folio Write's document model: no windows, no files, just text and structure.
+//! Pinion's document model: no windows, no files, just text and structure.
 //!
 //! A document is a list of blocks. Each block has a kind (paragraph, heading, list item, quote)
 //! and its text, where `**bold**` and `*italic*` markers stay in the text so editing is plain

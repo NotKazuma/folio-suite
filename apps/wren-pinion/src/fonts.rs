@@ -1,4 +1,4 @@
-//! egui ships no bold face, so Folio Write borrows the system's: Segoe UI Bold on Windows, and
+//! egui ships no bold face, so Pinion borrows the system's: Segoe UI Bold on Windows, and
 //! a few common names elsewhere. If none is found, bold text falls back to a stronger colour.
 
 use eframe::egui::{self, FontData, FontDefinitions, FontFamily};

@@ -1,5 +1,5 @@
 [package]
-name = "folio-docx"
+name = "wren-docx"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -7,7 +7,7 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-folio-write-doc = { path = "../write-doc" }
+wren-pinion-doc = { path = "../write-doc" }
 roxmltree = "0.20"
 zip = { version = "2", default-features = false, features = ["deflate"] }
 

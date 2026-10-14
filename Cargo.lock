@@ -1176,97 +1176,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "77ce24cb58228fbb8aa041425bb1050850ac19177686ea6e0f41a70416f56fdb"
 
 [[package]]
-name = "folio-core"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "folio-docx"
-version = "0.1.0"
-dependencies = [
- "folio-write-doc",
- "roxmltree",
- "zip",
-]
-
-[[package]]
-name = "folio-launcher"
-version = "0.1.0"
-dependencies = [
- "eframe",
- "folio-core",
- "folio-native",
- "folio-ui",
-]
-
-[[package]]
-name = "folio-native"
-version = "0.1.0"
-dependencies = [
- "dirs",
- "folio-core",
- "serde_json",
- "sha2",
- "ureq",
-]
-
-[[package]]
-name = "folio-sheet"
-version = "0.1.0"
-dependencies = [
- "eframe",
- "folio-sheet-engine",
- "rfd",
-]
-
-[[package]]
-name = "folio-sheet-engine"
-version = "0.1.0"
-
-[[package]]
-name = "folio-slide"
-version = "0.1.0"
-dependencies = [
- "eframe",
- "folio-slide-doc",
- "rfd",
-]
-
-[[package]]
-name = "folio-slide-doc"
-version = "0.1.0"
-dependencies = [
- "serde",
- "serde_json",
-]
-
-[[package]]
-name = "folio-ui"
-version = "0.1.0"
-dependencies = [
- "egui",
- "folio-core",
- "folio-native",
-]
-
-[[package]]
-name = "folio-write"
-version = "0.1.0"
-dependencies = [
- "eframe",
- "folio-docx",
- "folio-write-doc",
- "rfd",
-]
-
-[[package]]
-name = "folio-write-doc"
-version = "0.1.0"
-
-[[package]]
 name = "foreign-types"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4312,6 +4221,97 @@ name = "wit-bindgen"
 version = "0.57.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1ebf944e87a7c253233ad6766e082e3cd714b5d03812acc24c318f549614536e"
+
+[[package]]
+name = "wren-core"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "wren-docx"
+version = "0.1.0"
+dependencies = [
+ "roxmltree",
+ "wren-pinion-doc",
+ "zip",
+]
+
+[[package]]
+name = "wren-launcher"
+version = "0.1.0"
+dependencies = [
+ "eframe",
+ "wren-core",
+ "wren-native",
+ "wren-ui",
+]
+
+[[package]]
+name = "wren-native"
+version = "0.1.0"
+dependencies = [
+ "dirs",
+ "serde_json",
+ "sha2",
+ "ureq",
+ "wren-core",
+]
+
+[[package]]
+name = "wren-perch"
+version = "0.1.0"
+dependencies = [
+ "eframe",
+ "rfd",
+ "wren-perch-doc",
+]
+
+[[package]]
+name = "wren-perch-doc"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
+name = "wren-pinion"
+version = "0.1.0"
+dependencies = [
+ "eframe",
+ "rfd",
+ "wren-docx",
+ "wren-pinion-doc",
+]
+
+[[package]]
+name = "wren-pinion-doc"
+version = "0.1.0"
+
+[[package]]
+name = "wren-trellis"
+version = "0.1.0"
+dependencies = [
+ "eframe",
+ "rfd",
+ "wren-trellis-engine",
+]
+
+[[package]]
+name = "wren-trellis-engine"
+version = "0.1.0"
+
+[[package]]
+name = "wren-ui"
+version = "0.1.0"
+dependencies = [
+ "egui",
+ "wren-core",
+ "wren-native",
+]
 
 [[package]]
 name = "writeable"

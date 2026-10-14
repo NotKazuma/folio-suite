@@ -1,5 +1,5 @@
 [package]
-name = "folio-slide"
+name = "wren-launcher"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true
@@ -7,9 +7,10 @@ license.workspace = true
 repository.workspace = true
 
 [dependencies]
-folio-slide-doc = { path = "../../crates/slide-doc" }
+wren-core = { path = "../../crates/core" }
+wren-native = { path = "../../crates/native" }
+wren-ui = { path = "../../crates/ui-egui" }
 eframe = "0.33"
-rfd = "0.15"
 
 [lints]
 workspace = true

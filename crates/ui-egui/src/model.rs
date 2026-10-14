@@ -1,7 +1,7 @@
 //! What the window shows, separated from how it is drawn so it can be tested.
 
-use folio_core::{App, Platform, Status, Version, platform::pick_asset};
-use folio_native::{Event, Latest, state};
+use wren_core::{App, Platform, Status, Version, platform::pick_asset};
+use wren_native::{Event, Latest, state};
 
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum Job {
@@ -29,7 +29,7 @@ impl Model {
         let installed = state::installed();
         Model {
             platform,
-            apps: folio_core::SUITE
+            apps: wren_core::SUITE
                 .iter()
                 .map(|app| AppState { app, installed: installed.get(app.id).cloned(), latest: None, job: Job::Idle })
                 .collect(),
@@ -86,7 +86,7 @@ impl Model {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use folio_core::{Arch, Os, Release, release::Asset};
+    use wren_core::{Arch, Os, Release, release::Asset};
 
     fn model() -> Model {
         Model::new(Platform { os: Os::Windows, arch: Arch::X64 })
@@ -99,7 +99,7 @@ mod tests {
             page_url: String::new(),
             assets: files
                 .iter()
-                .map(|n| Asset { name: (*n).into(), url: "https://github.com/folio-suite/x".into(), size: 1 })
+                .map(|n| Asset { name: (*n).into(), url: "https://github.com/NotKazuma/wren-pinion".into(), size: 1 })
                 .collect(),
         })
     }
@@ -108,11 +108,11 @@ mod tests {
     fn events_drive_status() {
         let mut m = model();
         assert_eq!(m.status(&m.apps[0].clone()), Status::Unknown);
-        m.apply(vec![Event::Latest { id: "folio-write", latest: release("v1.0.0", &["folio-write-1.0.0-x64.msi"]) }]);
+        m.apply(vec![Event::Latest { id: "wren-pinion", latest: release("v1.0.0", &["wren-pinion-1.0.0-x64.msi"]) }]);
         assert_eq!(m.status(&m.apps[0].clone()), Status::NotInstalled);
-        m.apply(vec![Event::Progress { id: "folio-write", percent: 40 }]);
+        m.apply(vec![Event::Progress { id: "wren-pinion", percent: 40 }]);
         assert!(m.any_working());
-        m.apply(vec![Event::Installed { id: "folio-write", version: "v1.0.0".into() }]);
+        m.apply(vec![Event::Installed { id: "wren-pinion", version: "v1.0.0".into() }]);
         assert_eq!(m.status(&m.apps[0].clone()), Status::Current);
         assert!(!m.any_working());
     }
@@ -121,8 +121,8 @@ mod tests {
     fn unreleased_and_no_build() {
         let mut m = model();
         m.apply(vec![
-            Event::Latest { id: "folio-write", latest: Latest::None },
-            Event::Latest { id: "folio-sheet", latest: release("v1.0.0", &["folio-sheet-1.0.0-linux.AppImage"]) },
+            Event::Latest { id: "wren-pinion", latest: Latest::None },
+            Event::Latest { id: "wren-trellis", latest: release("v1.0.0", &["wren-trellis-1.0.0-linux.AppImage"]) },
         ]);
         assert_eq!(m.status(&m.apps[0].clone()), Status::Unreleased);
         assert_eq!(m.status(&m.apps[1].clone()), Status::NoBuild);

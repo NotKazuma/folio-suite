@@ -5,9 +5,9 @@ use std::fs::{self, File};
 use std::io::{Read, Write};
 use std::path::{Path, PathBuf};
 
-use folio_core::checksum::parse_sums;
-use folio_core::{ORG, Release, release::Asset};
 use sha2::{Digest, Sha256};
+use wren_core::checksum::parse_sums;
+use wren_core::{ORG, Release, release::Asset};
 
 use crate::{github, state};
 
@@ -141,7 +141,7 @@ mod tests {
 
     #[test]
     fn only_our_org_and_github_cdn() {
-        assert!(check_url("https://github.com/NotKazuma/folio-suite/releases/download/v1/a.msi").is_ok());
+        assert!(check_url("https://github.com/NotKazuma/wren-pinion/releases/download/v1/a.msi").is_ok());
         assert!(check_url("https://objects.githubusercontent.com/x").is_ok());
         assert!(check_url("https://github.com/evil/app/releases/download/v1/a.msi").is_err());
         assert!(check_url("http://github.com/NotKazuma/a").is_err());

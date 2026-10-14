@@ -14,14 +14,14 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
       - uses: Swatinem/rust-cache@v2
       - run: cargo test --workspace
-      - run: cargo build --release -p folio-launcher -p folio-write -p folio-sheet -p folio-slide
+      - run: cargo build --release -p wren-launcher -p wren-pinion -p wren-trellis -p wren-perch
       - name: Package
         shell: pwsh
         run: |
           # Files are named <app id>-<version>-windows-x64.exe: the launcher finds each app by that prefix.
           $v = "${{ github.ref_name }}".TrimStart('v')
           New-Item -ItemType Directory -Force dist | Out-Null
-          foreach ($app in 'folio-launcher','folio-write','folio-sheet','folio-slide') {
+          foreach ($app in 'wren-launcher','wren-pinion','wren-trellis','wren-perch') {
             Copy-Item "target/release/$app.exe" "dist/$app-$v-windows-x64.exe"
           }
           Push-Location dist

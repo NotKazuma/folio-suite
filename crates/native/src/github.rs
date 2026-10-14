@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use std::sync::Mutex;
 use std::time::Duration;
 
-use folio_core::Release;
+use wren_core::Release;
 
 use crate::Latest;
 
@@ -18,7 +18,7 @@ pub struct Cache {
 
 pub(crate) fn agent() -> ureq::Agent {
     ureq::AgentBuilder::new()
-        .user_agent("folio-launcher")
+        .user_agent("wren-launcher")
         .timeout_connect(Duration::from_secs(10))
         .timeout_read(Duration::from_secs(30))
         .build()
@@ -37,7 +37,7 @@ pub fn latest(cache: &Mutex<Cache>, repo: &str) -> Latest {
     let outcome = match req.call() {
         Ok(res) => {
             let (status, etag) = (res.status(), res.header("ETag").map(str::to_string));
-            let body = read_capped(res.into_reader(), folio_core::release::MAX_JSON_BYTES);
+            let body = read_capped(res.into_reader(), wren_core::release::MAX_JSON_BYTES);
             Some(interpret(status, etag, body, previous.as_ref()))
         }
         Err(ureq::Error::Status(code, _)) => Some(interpret(code, None, None, previous.as_ref())),
@@ -64,12 +64,12 @@ fn interpret(status: u16, etag: Option<String>, body: Option<String>, previous: 
         // Not modified: nothing new, keep what we had (or admit we have nothing to show).
         304 => previous
             .cloned()
-            .unwrap_or_else(|| (None, Latest::Error("GitHub sent an answer Folio could not read.".into()))),
+            .unwrap_or_else(|| (None, Latest::Error("GitHub sent an answer Wren could not read.".into()))),
         404 => (None, Latest::None),
         403 | 429 => (None, Latest::Error("GitHub rate limit reached; try again later.".into())),
         200..=299 => match body.map(|t| Release::parse(&t)) {
             Some(Ok(r)) => (etag, Latest::Release(r)),
-            _ => (None, Latest::Error("GitHub sent an answer Folio could not read.".into())),
+            _ => (None, Latest::Error("GitHub sent an answer Wren could not read.".into())),
         },
         code => (None, Latest::Error(format!("GitHub answered {code}."))),
     }

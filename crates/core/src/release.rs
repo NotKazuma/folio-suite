@@ -87,7 +87,7 @@ mod tests {
     #[test]
     fn parses_a_release() {
         let r = Release::parse(
-            r#"{"tag_name":"v1.2.0","body":"Fixes","html_url":"https://github.com/folio-suite/folio-write/releases/tag/v1.2.0",
+            r#"{"tag_name":"v1.2.0","body":"Fixes","html_url":"https://github.com/NotKazuma/wren-pinion/releases/tag/v1.2.0",
             "assets":[{"name":"a.msi","browser_download_url":"https://github.com/x/a.msi","size":42},
                       {"name":"SHA256SUMS.txt","browser_download_url":"https://github.com/x/s","size":3},
                       {"name":"","browser_download_url":"https://github.com/x/none"}]}"#,

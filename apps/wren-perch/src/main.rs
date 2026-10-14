@@ -1,4 +1,4 @@
-//! Folio Slide: a native presentation editor. Slides are drawn by one function, used for the
+//! Perch: a native presentation editor. Slides are drawn by one function, used for the
 //! canvas, the thumbnails and full-screen presenting alike.
 
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
@@ -10,7 +10,7 @@ use eframe::egui::{
     self, Align2, Color32, CornerRadius, FontData, FontDefinitions, FontFamily, FontId, Key, Modifiers, Painter, Pos2,
     Rect, Sense, Stroke, StrokeKind, vec2,
 };
-use folio_slide_doc::{Deck, HEIGHT, Item, Layout, Shape, Slide, Theme, WIDTH};
+use wren_perch_doc::{Deck, HEIGHT, Item, Layout, Shape, Slide, Theme, WIDTH};
 
 const MAX_UNDO: usize = 100;
 const HANDLE: f32 = 14.0;
@@ -210,7 +210,7 @@ impl App {
     }
 
     fn open(&mut self) {
-        let Some(path) = rfd::FileDialog::new().add_filter("Folio presentation", &["json"]).pick_file() else { return };
+        let Some(path) = rfd::FileDialog::new().add_filter("Wren presentation", &["json"]).pick_file() else { return };
         match std::fs::read_to_string(&path).map_err(|e| e.to_string()).and_then(|t| Deck::from_json(&t)) {
             Ok(deck) => {
                 self.snapshot();
@@ -229,7 +229,7 @@ impl App {
         let path = match (&self.path, as_new) {
             (Some(p), false) => p.clone(),
             _ => match rfd::FileDialog::new()
-                .add_filter("Folio presentation", &["json"])
+                .add_filter("Wren presentation", &["json"])
                 .set_file_name("presentation.json")
                 .save_file()
             {
@@ -264,7 +264,7 @@ impl App {
             .as_ref()
             .and_then(|p| p.file_name())
             .map_or("Untitled".into(), |n| n.to_string_lossy().to_string());
-        format!("{name}{} - Folio Slide", if self.dirty { " •" } else { "" })
+        format!("{name}{} - Perch", if self.dirty { " •" } else { "" })
     }
 }
 
@@ -678,10 +678,10 @@ impl App {
 fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
-            .with_title("Folio Slide")
+            .with_title("Perch")
             .with_inner_size([1100.0, 700.0])
             .with_min_inner_size([640.0, 420.0]),
         ..Default::default()
     };
-    eframe::run_native("Folio Slide", options, Box::new(|cc| Ok(Box::new(App::new(&cc.egui_ctx)))))
+    eframe::run_native("Perch", options, Box::new(|cc| Ok(Box::new(App::new(&cc.egui_ctx)))))
 }

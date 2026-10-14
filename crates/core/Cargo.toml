@@ -1,5 +1,5 @@
 [package]
-name = "folio-core"
+name = "wren-core"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

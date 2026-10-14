@@ -7,7 +7,7 @@ use eframe::egui::{
     self, Color32, FontId, Key, Modifiers, RichText, Stroke, TextFormat,
     text::{CCursor, CCursorRange, LayoutJob},
 };
-use folio_write_doc::{
+use wren_pinion_doc::{
     Block, Document, History, Kind, Match, find_all, replace_all, replace_one, spans, toggle_marker,
 };
 
@@ -81,7 +81,7 @@ impl Editor {
             .as_ref()
             .and_then(|p| p.file_name())
             .map_or("Untitled".to_string(), |n| n.to_string_lossy().into());
-        format!("{}{} - Folio Write", name, if self.dirty { " •" } else { "" })
+        format!("{}{} - Pinion", name, if self.dirty { " •" } else { "" })
     }
 
     // ---- files ---------------------------------------------------------------------------------
@@ -110,7 +110,7 @@ impl Editor {
         let loaded = if is_docx {
             std::fs::read(&path)
                 .map_err(|e| e.to_string())
-                .and_then(|bytes| folio_docx::import(&bytes).map_err(|e| e.to_string()))
+                .and_then(|bytes| wren_docx::import(&bytes).map_err(|e| e.to_string()))
         } else {
             std::fs::read_to_string(&path).map(|t| Document::from_markdown(&t)).map_err(|e| e.to_string())
         };
@@ -141,7 +141,7 @@ impl Editor {
         };
         let is_docx = path.extension().is_some_and(|e| e.eq_ignore_ascii_case("docx"));
         let written = if is_docx {
-            folio_docx::export(&self.doc)
+            wren_docx::export(&self.doc)
                 .map_err(|e| e.to_string())
                 .and_then(|b| std::fs::write(&path, b).map_err(|e| e.to_string()))
         } else {
@@ -592,4 +592,4 @@ fn block_ui(
     action
 }
 
-const WELCOME: &str = "# Welcome to Folio Write\n\nThis is a **native**, *lightweight* word processor. Click anywhere and start typing.\n\n## What works today\n\n- Headings, paragraphs, quotes and lists (choose from the style menu)\n- **Bold** and *italic* with Ctrl+B and Ctrl+I, or the toolbar buttons\n- Open and save plain Markdown files\n\n1. Press Enter to start a new block\n2. Press Backspace at the start of a block to join it with the one above\n\n> Your documents are ordinary Markdown files, so you always own them.\n";
+const WELCOME: &str = "# Welcome to Pinion\n\nThis is a **native**, *lightweight* word processor. Click anywhere and start typing.\n\n## What works today\n\n- Headings, paragraphs, quotes and lists (choose from the style menu)\n- **Bold** and *italic* with Ctrl+B and Ctrl+I, or the toolbar buttons\n- Open and save plain Markdown files\n\n1. Press Enter to start a new block\n2. Press Backspace at the start of a block to join it with the one above\n\n> Your documents are ordinary Markdown files, so you always own them.\n";

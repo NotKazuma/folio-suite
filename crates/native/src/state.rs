@@ -8,12 +8,12 @@ use std::path::{Path, PathBuf};
 
 use serde_json::{Value, json};
 
-/// `%LOCALAPPDATA%\Folio` (or the platform's equivalent). `FOLIO_HOME` overrides it.
+/// `%LOCALAPPDATA%\Wren` (or the platform's equivalent). `WREN_HOME` overrides it.
 pub fn data_dir() -> PathBuf {
-    if let Some(p) = std::env::var_os("FOLIO_HOME") {
+    if let Some(p) = std::env::var_os("WREN_HOME") {
         return PathBuf::from(p);
     }
-    dirs::data_local_dir().unwrap_or_else(std::env::temp_dir).join("Folio")
+    dirs::data_local_dir().unwrap_or_else(std::env::temp_dir).join("Wren")
 }
 
 fn state_file() -> PathBuf {
@@ -66,7 +66,7 @@ mod tests {
     use super::*;
 
     fn scratch(name: &str) -> PathBuf {
-        let dir = std::env::temp_dir().join(format!("folio-{name}-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("wren-{name}-{}", std::process::id()));
         let _ = fs::remove_dir_all(&dir);
         dir
     }
@@ -75,12 +75,12 @@ mod tests {
     fn records_and_reads_back() {
         let file = scratch("state").join("state.json");
         assert!(read_installed(&file).is_empty());
-        write_install(&file, "folio-write", "v1.0.0", true).unwrap();
-        write_install(&file, "folio-sheet", "v0.2.0", true).unwrap();
-        write_install(&file, "folio-write", "v1.1.0", true).unwrap();
+        write_install(&file, "wren-pinion", "v1.0.0", true).unwrap();
+        write_install(&file, "wren-trellis", "v0.2.0", true).unwrap();
+        write_install(&file, "wren-pinion", "v1.1.0", true).unwrap();
         let all = read_installed(&file);
-        assert_eq!(all.get("folio-write").map(String::as_str), Some("v1.1.0"));
-        assert_eq!(all.get("folio-sheet").map(String::as_str), Some("v0.2.0"));
+        assert_eq!(all.get("wren-pinion").map(String::as_str), Some("v1.1.0"));
+        assert_eq!(all.get("wren-trellis").map(String::as_str), Some("v0.2.0"));
         let _ = fs::remove_dir_all(file.parent().unwrap());
     }
 
@@ -92,7 +92,7 @@ mod tests {
         fs::write(&file, "{ not json").unwrap();
         assert!(read_installed(&file).is_empty());
         // and a later install still works
-        write_install(&file, "folio-pdf", "v1.0.0", false).unwrap();
+        write_install(&file, "wren-magpie", "v1.0.0", false).unwrap();
         assert_eq!(read_installed(&file).len(), 1);
         let _ = fs::remove_dir_all(&dir);
     }
