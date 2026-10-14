@@ -453,16 +453,14 @@ impl App {
             painter.rect_stroke(corner, 0.0, Stroke::new(1.0_f32, line), StrokeKind::Inside);
 
             // clicks
-            if let Some(p) = resp.interact_pointer_pos() {
-                if resp.clicked() || resp.double_clicked() {
-                    let rel = p - rect.min;
-                    if rel.x >= HEAD_W && rel.y >= HEAD_H {
-                        let c = ((rel.x - HEAD_W) / CELL_W) as u32;
-                        let r = ((rel.y - HEAD_H) / CELL_H) as u32;
-                        if c < COLS && r < ROWS {
-                            clicked = Some(Addr::new(c, r));
-                            double = resp.double_clicked();
-                        }
+            if let Some(p) = resp.interact_pointer_pos().filter(|_| resp.clicked() || resp.double_clicked()) {
+                let rel = p - rect.min;
+                if rel.x >= HEAD_W && rel.y >= HEAD_H {
+                    let c = ((rel.x - HEAD_W) / CELL_W) as u32;
+                    let r = ((rel.y - HEAD_H) / CELL_H) as u32;
+                    if c < COLS && r < ROWS {
+                        clicked = Some(Addr::new(c, r));
+                        double = resp.double_clicked();
                     }
                 }
             }
