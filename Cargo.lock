@@ -1214,6 +1214,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "folio-sheet"
+version = "0.1.0"
+dependencies = [
+ "eframe",
+ "folio-sheet-engine",
+ "rfd",
+]
+
+[[package]]
+name = "folio-sheet-engine"
+version = "0.1.0"
+
+[[package]]
 name = "folio-ui"
 version = "0.1.0"
 dependencies = [
