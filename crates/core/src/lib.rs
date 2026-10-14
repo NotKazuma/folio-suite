@@ -13,7 +13,7 @@ pub mod release;
 pub mod status;
 pub mod version;
 
-pub use catalog::{App, ORG, SUITE, Stage};
+pub use catalog::{App, ORG, SUITE, SUITE_REPO, Stage};
 pub use platform::{Arch, Os, Platform};
 pub use release::{Asset, Release};
 pub use status::Status;

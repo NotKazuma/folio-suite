@@ -76,6 +76,11 @@ fn arch_words(a: Arch) -> &'static [&'static str] {
     }
 }
 
+/// `folio-write-1.0.0-x64.exe` belongs to `folio-write`; `folio-writer-...` does not.
+fn is_own_file(lower_name: &str, stem: &str) -> bool {
+    lower_name[stem.len()..].starts_with(['-', '_', '.'])
+}
+
 fn words(name: &str) -> Vec<String> {
     name.to_lowercase()
         .split(|c: char| !c.is_ascii_alphanumeric() && c != '_')
@@ -88,9 +93,10 @@ fn has_any(ws: &[String], list: &[&str]) -> bool {
     ws.iter().any(|w| list.contains(&w.as_str()))
 }
 
-/// The best file for `platform`, or `None`. Checksum and signature files are never candidates,
-/// and a file built for the other CPU family is skipped.
-pub fn pick_asset(assets: &[Asset], platform: Platform) -> Option<&Asset> {
+/// The best file for `platform` belonging to the app whose files start with `stem`, or `None`.
+/// Checksum and signature files are never candidates, and a file built for the other CPU family
+/// is skipped.
+pub fn pick_asset<'a>(assets: &'a [Asset], platform: Platform, stem: &str) -> Option<&'a Asset> {
     let kinds = platform.kinds();
     let mine = arch_words(platform.arch);
     let other: Vec<&str> =
@@ -98,6 +104,9 @@ pub fn pick_asset(assets: &[Asset], platform: Platform) -> Option<&Asset> {
     let mut best: Option<(&Asset, i32)> = None;
     for asset in assets {
         let lower = asset.name.to_lowercase();
+        if !lower.starts_with(&stem.to_lowercase()) || !is_own_file(&lower, stem) {
+            continue;
+        }
         let Some(kind) = kinds.iter().position(|k| lower.ends_with(k)) else { continue };
         if lower.contains("sha256") || lower.ends_with(".sig") || lower.ends_with(".asc") {
             continue;
@@ -143,24 +152,37 @@ mod tests {
             "folio-write-1.0.0-linux-x86_64.AppImage",
             "SHA256SUMS.txt",
         ]);
-        assert_eq!(pick_asset(&a, WIN_X64).unwrap().name, "folio-write-1.0.0-windows-x64.msi");
+        assert_eq!(pick_asset(&a, WIN_X64, "folio-write").unwrap().name, "folio-write-1.0.0-windows-x64.msi");
         let arm = Platform { os: Os::Windows, arch: Arch::Arm64 };
-        assert_eq!(pick_asset(&a, arm).unwrap().name, "folio-write-1.0.0-windows-arm64.msi");
+        assert_eq!(pick_asset(&a, arm, "folio-write").unwrap().name, "folio-write-1.0.0-windows-arm64.msi");
         let mac_intel = Platform { os: Os::MacOs, arch: Arch::X64 };
-        assert!(pick_asset(&a, mac_intel).is_none());
+        assert!(pick_asset(&a, mac_intel, "folio-write").is_none());
         let linux = Platform { os: Os::Linux, arch: Arch::X64 };
-        assert!(pick_asset(&a, linux).unwrap().name.ends_with(".AppImage"));
+        assert!(pick_asset(&a, linux, "folio-write").unwrap().name.ends_with(".AppImage"));
     }
 
     #[test]
     fn installer_beats_bare_exe_and_checksums_never_win() {
         let a = assets(&["folio-x64.exe", "folio-x64.msi", "folio-x64.msi.sha256"]);
-        assert_eq!(pick_asset(&a, WIN_X64).unwrap().name, "folio-x64.msi");
+        assert_eq!(pick_asset(&a, WIN_X64, "folio").unwrap().name, "folio-x64.msi");
+    }
+
+    #[test]
+    fn each_app_only_sees_its_own_files() {
+        let a = assets(&[
+            "folio-write-1.0.0-windows-x64.exe",
+            "folio-sheet-1.0.0-windows-x64.exe",
+            "folio-writer-1.0.0-windows-x64.exe",
+        ]);
+        assert_eq!(pick_asset(&a, WIN_X64, "folio-write").unwrap().name, "folio-write-1.0.0-windows-x64.exe");
+        assert_eq!(pick_asset(&a, WIN_X64, "folio-sheet").unwrap().name, "folio-sheet-1.0.0-windows-x64.exe");
+        assert!(pick_asset(&a, WIN_X64, "folio-slide").is_none());
+        assert!(pick_asset(&a, WIN_X64, "folio-wri").is_none());
     }
 
     #[test]
     fn unknown_os_gets_nothing() {
         let a = assets(&["folio.msi"]);
-        assert!(pick_asset(&a, Platform { os: Os::Other, arch: Arch::X64 }).is_none());
+        assert!(pick_asset(&a, Platform { os: Os::Other, arch: Arch::X64 }, "folio").is_none());
     }
 }

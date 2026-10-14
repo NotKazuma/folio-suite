@@ -81,8 +81,8 @@ impl Backend {
                     Latest::None => return Err("No release has been published yet.".into()),
                     Latest::Error(e) => return Err(e),
                 };
-                let asset =
-                    pick_asset(&release.assets, platform).ok_or("This release has no build for your computer.")?;
+                let asset = pick_asset(&release.assets, platform, app.id)
+                    .ok_or("This release has no build for your computer.")?;
                 let progress = |percent| {
                     let _ = tx.send(Event::Progress { id: app.id, percent });
                 };

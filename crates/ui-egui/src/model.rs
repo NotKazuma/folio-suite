@@ -70,7 +70,9 @@ impl Model {
             None => return Status::Unknown,
             Some(Latest::Error(_)) => (None, false),
             Some(Latest::None) => (Some(None), false),
-            Some(Latest::Release(r)) => (Some(Version::parse(&r.tag)), pick_asset(&r.assets, self.platform).is_some()),
+            Some(Latest::Release(r)) => {
+                (Some(Version::parse(&r.tag)), pick_asset(&r.assets, self.platform, s.app.id).is_some())
+            }
         };
         match latest {
             None => Status::Unknown,
@@ -106,7 +108,7 @@ mod tests {
     fn events_drive_status() {
         let mut m = model();
         assert_eq!(m.status(&m.apps[0].clone()), Status::Unknown);
-        m.apply(vec![Event::Latest { id: "folio-write", latest: release("v1.0.0", &["w-x64.msi"]) }]);
+        m.apply(vec![Event::Latest { id: "folio-write", latest: release("v1.0.0", &["folio-write-1.0.0-x64.msi"]) }]);
         assert_eq!(m.status(&m.apps[0].clone()), Status::NotInstalled);
         m.apply(vec![Event::Progress { id: "folio-write", percent: 40 }]);
         assert!(m.any_working());
@@ -120,7 +122,7 @@ mod tests {
         let mut m = model();
         m.apply(vec![
             Event::Latest { id: "folio-write", latest: Latest::None },
-            Event::Latest { id: "folio-sheet", latest: release("v1.0.0", &["s-linux.AppImage"]) },
+            Event::Latest { id: "folio-sheet", latest: release("v1.0.0", &["folio-sheet-1.0.0-linux.AppImage"]) },
         ]);
         assert_eq!(m.status(&m.apps[0].clone()), Status::Unreleased);
         assert_eq!(m.status(&m.apps[1].clone()), Status::NoBuild);

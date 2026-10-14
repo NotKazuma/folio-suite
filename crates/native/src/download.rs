@@ -48,7 +48,7 @@ pub fn check_url(url: &str) -> Result<(), Error> {
     let rest = url.strip_prefix("https://").ok_or_else(|| Error::Refused(url.to_string()))?;
     let (host, path) = rest.split_once('/').unwrap_or((rest, ""));
     let host = host.to_ascii_lowercase();
-    let own = host == "github.com" && path.to_ascii_lowercase().starts_with(&format!("{ORG}/"));
+    let own = host == "github.com" && path.to_ascii_lowercase().starts_with(&format!("{}/", ORG.to_ascii_lowercase()));
     let cdn = matches!(host.as_str(), "objects.githubusercontent.com" | "release-assets.githubusercontent.com");
     if own || cdn { Ok(()) } else { Err(Error::Refused(host)) }
 }
@@ -141,12 +141,12 @@ mod tests {
 
     #[test]
     fn only_our_org_and_github_cdn() {
-        assert!(check_url("https://github.com/folio-suite/folio-write/releases/download/v1/a.msi").is_ok());
+        assert!(check_url("https://github.com/NotKazuma/folio-suite/releases/download/v1/a.msi").is_ok());
         assert!(check_url("https://objects.githubusercontent.com/x").is_ok());
         assert!(check_url("https://github.com/evil/app/releases/download/v1/a.msi").is_err());
-        assert!(check_url("http://github.com/folio-suite/a").is_err());
+        assert!(check_url("http://github.com/NotKazuma/a").is_err());
         assert!(check_url("https://example.com/a.msi").is_err());
-        assert!(check_url("https://github.com.evil.io/folio-suite/a").is_err());
+        assert!(check_url("https://github.com.evil.io/NotKazuma/a").is_err());
     }
 
     #[test]

@@ -1,0 +1,15 @@
+[package]
+name = "folio-slide"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+
+[dependencies]
+folio-slide-doc = { path = "../../crates/slide-doc" }
+eframe = "0.33"
+rfd = "0.15"
+
+[lints]
+workspace = true

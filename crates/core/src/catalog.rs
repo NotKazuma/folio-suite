@@ -1,8 +1,11 @@
 //! The Folio app suite. The list is data, so a later version can fetch it instead.
 
-/// The GitHub account every Folio app's releases live under. The launcher downloads from
-/// nowhere else.
-pub const ORG: &str = "folio-suite";
+/// The GitHub account the suite's releases live under. The launcher downloads from nowhere else.
+pub const ORG: &str = "NotKazuma";
+
+/// The repository holding the suite's releases. Every app publishes its files there, named
+/// `<app id>-<version>-<platform>.<ext>`, until each app has a repository of its own.
+pub const SUITE_REPO: &str = "folio-suite";
 
 /// How far along an app is.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -37,9 +40,9 @@ pub struct App {
 }
 
 impl App {
-    /// `owner/repo` on GitHub.
+    /// `owner/repo` on GitHub that publishes this app.
     pub fn repo(&self) -> String {
-        format!("{ORG}/{}", self.id)
+        format!("{ORG}/{SUITE_REPO}")
     }
 
     pub fn releases_url(&self) -> String {
@@ -106,7 +109,7 @@ mod tests {
     #[test]
     fn repo_and_initials() {
         let a = App::find("folio-write").unwrap();
-        assert_eq!(a.repo(), "folio-suite/folio-write");
+        assert_eq!(a.repo(), "NotKazuma/folio-suite");
         assert_eq!(a.initials(), "Wr");
         assert_eq!(App::find("folio-pdf").unwrap().initials(), "Pd");
         assert!(App::find("nope").is_none());
